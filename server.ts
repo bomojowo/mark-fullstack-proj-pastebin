@@ -23,13 +23,19 @@ const app = express();
 app.use(express.json()); //add body parser to each following route handler
 app.use(cors()); //add CORS support to each following route handler
 
-// const client = new Client(dbConfig);
-// client.connect();
+const client = new Client(dbConfig);
+client.connect();
 
 app.get("/", async (req, res) => {
-  // const dbres = await client.query("select * from categories");
+  const dbres = await client.query("select * from student");
+  const students = dbres.rows
   // res.json(dbres.rows);
-  res.sendStatus(200);
+  res.status(200).json({
+    status:"sucess",
+    data: {
+      students
+    }
+  });
 });
 
 //Start the server on the given port
