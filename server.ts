@@ -29,7 +29,7 @@ app.use(cors()); //add CORS support to each following route handler
 app.get("/", async (req, res) => {
   // const dbres = await client.query("select * from categories");
   // res.json(dbres.rows);
-  res.status(200);
+  res.sendStatus(200);
 });
 
 //Start the server on the given port
