@@ -27,16 +27,35 @@ const client = new Client(dbConfig);
 client.connect();
 
 app.get("/", async (req, res) => {
-  const dbres = await client.query("select * from student");
-  const students = dbres.rows
+  const dbres = await client.query("select * from pastebin");
+  const pastes = dbres.rows;
   // res.json(dbres.rows);
   res.status(200).json({
-    status:"sucess",
-    data: {
-      students
-    }
+    pastes,
   });
 });
+
+//creat a new paste
+app.post("/pastes", async (req,res) => {
+  try {
+    console.log(req.body)
+    const {user_name, description, code} = req.body
+
+    console.log({user_name, description, code})
+    const text = ("INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)")
+    const values = [user_name, description, code]
+    const newPaste = await client.query(text, values)
+    res.sendStatus(200)
+  } catch (err) {
+    console.error(err.message)
+    res.sendStatus(500)
+  }
+})
+
+//get a list of all pastes
+//app.get("/pastes", async (req, res) => {
+
+//})
 
 //Start the server on the given port
 const port = process.env.PORT;
