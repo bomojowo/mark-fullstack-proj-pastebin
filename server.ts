@@ -27,8 +27,8 @@ const client = new Client(dbConfig);
 client.connect();
 
 app.get("/", async (req, res) => {
-  const dbres = await client.query("select * from pastebin");
-  const pastes = dbres.rows;
+  const dbres = await client.query("select user_name, description, code from pastebin order by id desc");
+   const pastes = dbres.rows;
   // res.json(dbres.rows);
   res.status(200).json({
     pastes,
@@ -38,10 +38,10 @@ app.get("/", async (req, res) => {
 //creat a new paste
 app.post("/pastes", async (req,res) => {
   try {
-    console.log(req.body)
+    //console.log(req.body)
     const {user_name, description, code} = req.body
 
-    console.log({user_name, description, code})
+    //console.log({user_name, description, code})
     const text = ("INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)")
     const values = [user_name, description, code]
     const newPaste = await client.query(text, values)
