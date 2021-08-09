@@ -1,6 +1,6 @@
 import { Client } from "pg";
 import { config } from "dotenv";
-import express from "express";
+import express, { query } from "express";
 import cors from "cors";
 
 config(); //Read .env file lines as though they were env vars.
@@ -26,8 +26,9 @@ app.use(cors()); //add CORS support to each following route handler
 const client = new Client(dbConfig);
 client.connect();
 
+//gets all pastes
 app.get("/pastes", async (req, res) => {
-  const dbres = await client.query("select user_name, description, code from pastebin order by id desc");
+  const dbres = await client.query("select * from pastebin order by id desc");
    const pastes = dbres.rows;
   // res.json(dbres.rows);
   res.status(200).json({
@@ -35,7 +36,7 @@ app.get("/pastes", async (req, res) => {
   });
 });
 
-//creat a new paste
+//create a new paste
 app.post("/pastes", async (req,res) => {
   try {
     //console.log(req.body)
@@ -52,10 +53,18 @@ app.post("/pastes", async (req,res) => {
   }
 })
 
-//get a list of all pastes
-//app.get("/pastes", async (req, res) => {
-
-//})
+//deletes selected paste
+app.delete("/pastes/:id", async (req, res) => {
+try{
+  const {id} = req.params
+  const text = ("DELETE FROM pastebin WHERE id = $1")
+  const values = [id]
+  const deletePaste = await client.query(text, values)
+  res.json("Paste was deleted!")
+} catch (err) {
+  console.log(err.message)
+}
+})
 
 //Start the server on the given port
 const port = process.env.PORT;
