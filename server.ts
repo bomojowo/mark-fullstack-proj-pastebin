@@ -66,6 +66,20 @@ try{
 }
 })
 
+//edit selected paste
+app.put("/pastes/:id", async (req, res) =>{
+  try{
+const {id} = req.params
+const {code} = req.body
+const text = ("UPDATE pastebin SET code = $1 WHERE id = $2")
+const values =[code, id]
+const editPaste = await client.query(text, values)
+res.json("Code was updated")
+  } catch (err){
+    console.log(err.message)
+  }
+})
+
 //Start the server on the given port
 const port = process.env.PORT;
 if (!port) {
