@@ -75,6 +75,7 @@ const text = ("UPDATE pastebin SET code = $1 WHERE id = $2")
 const values =[code, id]
 const editPaste = await client.query(text, values)
 res.json("Code was updated")
+
   } catch (err){
     console.log(err.message)
   }
