@@ -29,7 +29,7 @@ client.connect();
 //gets all pastes
 app.get("/pastes", async (req, res) => {
   const dbres = await client.query("select * from pastebin order by id desc");
-   const pastes = dbres.rows;
+  const pastes = dbres.rows;
   // res.json(dbres.rows);
   res.status(200).json({
     pastes,
@@ -37,49 +37,49 @@ app.get("/pastes", async (req, res) => {
 });
 
 //create a new paste
-app.post("/pastes", async (req,res) => {
+app.post("/pastes", async (req, res) => {
   try {
     //console.log(req.body)
-    const {user_name, description, code} = req.body
+    const { user_name, description, code } = req.body;
 
     //console.log({user_name, description, code})
-    const text = ("INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)")
-    const values = [user_name, description, code]
-    const newPaste = await client.query(text, values)
-    res.sendStatus(200)
+    const text =
+      "INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)";
+    const values = [user_name, description, code];
+    const newPaste = await client.query(text, values);
+    res.sendStatus(200);
   } catch (err) {
-    console.error(err.message)
-    res.sendStatus(500)
+    console.error(err.message);
+    res.sendStatus(500);
   }
-})
+});
 
 //deletes selected paste
 app.delete("/pastes/:id", async (req, res) => {
-try{
-  const {id} = req.params
-  const text = ("DELETE FROM pastebin WHERE id = $1")
-  const values = [id]
-  const deletePaste = await client.query(text, values)
-  res.json("Paste was deleted!")
-} catch (err) {
-  console.log(err.message)
-}
-})
+  try {
+    const { id } = req.params;
+    const text = "DELETE FROM pastebin WHERE id = $1";
+    const values = [id];
+    const deletePaste = await client.query(text, values);
+    res.json("Paste was deleted!");
+  } catch (err) {
+    console.log(err.message);
+  }
+});
 
 //edit selected paste
-app.put("/pastes/:id", async (req, res) =>{
-  try{
-const {id} = req.params
-const {code} = req.body
-const text = ("UPDATE pastebin SET code = $1 WHERE id = $2")
-const values =[code, id]
-const editPaste = await client.query(text, values)
-res.json("Code was updated")
-
-  } catch (err){
-    console.log(err.message)
+app.put("/pastes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { code } = req.body;
+    const text = "UPDATE pastebin SET code = $1 WHERE id = $2";
+    const values = [code, id];
+    const editPaste = await client.query(text, values);
+    res.json("Code was updated");
+  } catch (err) {
+    console.log(err.message);
   }
-})
+});
 
 //Start the server on the given port
 const port = process.env.PORT;
