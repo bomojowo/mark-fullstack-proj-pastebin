@@ -28,12 +28,17 @@ client.connect();
 
 //gets all pastes
 app.get("/pastes", async (req, res) => {
-  const dbres = await client.query("select * from pastebin order by id desc");
+  try{
+  const dbres = await client.query("select * from pastebin order by paste_id desc");
   const pastes = dbres.rows;
   // res.json(dbres.rows);
   res.status(200).json({
     pastes,
   });
+} catch (err) {
+  console.log(err.message);
+  res.sendStatus(500)
+}
 });
 
 //create a new paste
@@ -41,12 +46,10 @@ app.post("/pastes", async (req, res) => {
   try {
     //console.log(req.body)
     const { user_name, description, code } = req.body;
-
-    //console.log({user_name, description, code})
     const text =
       "INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)";
     const values = [user_name, description, code];
-    const newPaste = await client.query(text, values);
+    await client.query(text, values);
     res.sendStatus(200);
   } catch (err) {
     console.error(err.message);
@@ -55,11 +58,11 @@ app.post("/pastes", async (req, res) => {
 });
 
 //deletes selected paste
-app.delete("/pastes/:id", async (req, res) => {
+app.delete("/pastes/:paste_id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const text = "DELETE FROM pastebin WHERE id = $1";
-    const values = [id];
+    const { paste_id } = req.params;
+    const text = "DELETE FROM pastebin WHERE paste_id = $1";
+    const values = [paste_id];
     const deletePaste = await client.query(text, values);
     res.json("Paste was deleted!");
   } catch (err) {
@@ -68,18 +71,56 @@ app.delete("/pastes/:id", async (req, res) => {
 });
 
 //edit selected paste
-app.put("/pastes/:id", async (req, res) => {
+app.put("/pastes/:paste_id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const { paste_id } = req.params;
     const { code } = req.body;
-    const text = "UPDATE pastebin SET code = $1 WHERE id = $2";
-    const values = [code, id];
+    const text = "UPDATE pastebin SET code = $1 WHERE paste_id = $2";
+    const values = [code, paste_id];
     const editPaste = await client.query(text, values);
     res.json("Code was updated");
   } catch (err) {
     console.log(err.message);
   }
 });
+
+//postcomment route
+app.post("/pastes/comments", async (req, res) => {
+  try {
+    const { comment } = req.body;
+    const text =
+      "INSERT INTO comments (comment) VALUES ($1)";
+    const values = [comment];
+    const newComment = await client.query(text, values);
+    res.sendStatus(200);
+   
+  } catch (err) {
+    console.log(err.message);
+  }
+})
+
+//getcomment route
+app.get("/pastes/:paste_id/comments", async (req, res) => {
+  try {
+    const dbres = await client.query("SELECT * from comments")
+    const comments = dbres.rows
+  // res.json(dbres.rows);
+  res.status(200).json({
+    comments,
+  });
+  } catch (err) {
+    console.log(err.message);
+  }
+})
+
+//deletecomment route
+app.delete("/pastes/:paste_id/comments/:paste_id", async (req, res) => {
+  try {
+    res.sendStatus(200)
+  } catch (err) {
+    console.log(err.message)
+  }
+})
 
 //Start the server on the given port
 const port = process.env.PORT;
