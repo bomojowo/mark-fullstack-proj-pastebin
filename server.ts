@@ -85,13 +85,16 @@ app.put("/pastes/:paste_id", async (req, res) => {
 });
 
 //postcomment route
-app.post("/pastes/comments", async (req, res) => {
+app.post("/pastes/:paste_id/comments", async (req, res) => {
   try {
+    const { paste_id } = req.params
     const { comment } = req.body;
     const text =
-      "INSERT INTO comments (comment) VALUES ($1)";
-    const values = [comment];
-    const newComment = await client.query(text, values);
+      "INSERT INTO comments (comment, paste_id) VALUES ($1, $2)";
+    const values = [comment, paste_id];
+    
+    console.log(paste_id, comment)
+    await client.query(text,values)
     res.sendStatus(200);
    
   } catch (err) {
@@ -99,10 +102,21 @@ app.post("/pastes/comments", async (req, res) => {
   }
 })
 
+//'SELECT * FROM "Booking" JOIN "User" ON "User.id"="Booking.renter"'
+//'SELECT * FROM "Booking" JOIN "User" ON "User"."id"="Booking"."renter"'
+
+//SELECT user_name, description, code, comment
+// FROM pastebin
+// LEFT JOIN comments
+// 	ON pastebin.paste_id = comments.paste_id 
+
 //getcomment route
 app.get("/pastes/:paste_id/comments", async (req, res) => {
   try {
-    const dbres = await client.query("SELECT * from comments")
+    const { paste_id } = req.params
+    const text = "SELECT comment_id, comment, comments.paste_id FROM comments LEFT JOIN pastebin ON pastebin.paste_id = comments.paste_id WHERE pastebin.paste_id = $1"
+    const values = [paste_id]
+    const dbres = await client.query(text, values)
     const comments = dbres.rows
   // res.json(dbres.rows);
   res.status(200).json({
