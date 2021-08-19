@@ -61,9 +61,11 @@ app.post("/pastes", async (req, res) => {
 app.delete("/pastes/:paste_id", async (req, res) => {
   try {
     const { paste_id } = req.params;
-    const text = "DELETE FROM pastebin WHERE paste_id = $1";
+    const textComments = "DELETE FROM comments WHERE paste_id = $1";
+    const textPaste = "DELETE FROM pastebin WHERE paste_id = $1";
     const values = [paste_id];
-    const deletePaste = await client.query(text, values);
+    const deleteComments = await client.query(textComments, values)
+    const deletePaste = await client.query(textPaste, values);
     res.json("Paste was deleted!");
   } catch (err) {
     console.log(err.message);
