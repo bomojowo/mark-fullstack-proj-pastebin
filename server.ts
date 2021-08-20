@@ -104,14 +104,6 @@ app.post("/pastes/:paste_id/comments", async (req, res) => {
   }
 });
 
-//'SELECT * FROM "Booking" JOIN "User" ON "User.id"="Booking.renter"'
-//'SELECT * FROM "Booking" JOIN "User" ON "User"."id"="Booking"."renter"'
-
-//SELECT user_name, description, code, comment
-// FROM pastebin
-// LEFT JOIN comments
-// 	ON pastebin.paste_id = comments.paste_id
-
 //getcomment route
 app.get("/pastes/:paste_id/comments", async (req, res) => {
   try {
@@ -131,9 +123,19 @@ app.get("/pastes/:paste_id/comments", async (req, res) => {
 });
 
 //deletecomment route
-app.delete("/pastes/:paste_id/comments/:paste_id", async (req, res) => {
+app.delete("/pastes/:paste_id/comments/:comment_id", async (req, res) => {
   try {
-    res.sendStatus(200);
+    const { paste_id, comment_id } = req.params;
+    const text = "DELETE FROM comments WHERE paste_id = $1 AND comment_id = $2";
+    const values = [paste_id, comment_id];
+    console.log({ values });
+    const result = await client.query(text, values);
+    //console.log(result)
+    if (result.rowCount > 0) {
+      res.json("Comment was deleted");
+    } else {
+      res.status(404).json("There is no comment with that id present");
+    }
   } catch (err) {
     console.log(err.message);
   }
