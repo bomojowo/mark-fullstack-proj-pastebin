@@ -109,7 +109,7 @@ app.get("/pastes/:paste_id/comments", async (req, res) => {
   try {
     const { paste_id } = req.params;
     const text =
-      "SELECT comment_id, comment, comments.paste_id FROM comments LEFT JOIN pastes ON pastes.paste_id = comments.paste_id WHERE pastes.paste_id = $1";
+      "SELECT comments.comment_id, comment, comments.paste_id FROM comments LEFT JOIN pastes ON pastes.paste_id = comments.paste_id WHERE pastes.paste_id = $1";
     const values = [paste_id];
     const dbres = await client.query(text, values);
     const comments = dbres.rows;
