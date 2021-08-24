@@ -12,12 +12,12 @@ config(); //Read .env file lines as though they were env vars.
 // false - when connecting to a local DB
 // { rejectUnauthorized: false } - when connecting to a heroku DB
 const herokuSSLSetting = { rejectUnauthorized: false };
-const sslSetting = process.env.LOCAL ? false : herokuSSLSetting;
+const sslSetting = process.env.LOCAL ? herokuSSLSetting : herokuSSLSetting;
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
   ssl: sslSetting,
 };
-
+console.log({ dbConfig });
 const app = express();
 
 app.use(express.json()); //add body parser to each following route handler
@@ -30,7 +30,7 @@ client.connect();
 app.get("/pastes", async (req, res) => {
   try {
     const dbres = await client.query(
-      "select * from pastebin order by paste_id desc"
+      "select * from pastes order by paste_id desc"
     );
     const pastes = dbres.rows;
     // res.json(dbres.rows);
@@ -49,7 +49,7 @@ app.post("/pastes", async (req, res) => {
     //console.log(req.body)
     const { user_name, description, code } = req.body;
     const text =
-      "INSERT INTO pastebin (user_name, description, code) VALUES ($1, $2, $3)";
+      "INSERT INTO pastes (user_name, description, code) VALUES ($1, $2, $3)";
     const values = [user_name, description, code];
     await client.query(text, values);
     res.sendStatus(200);
@@ -64,7 +64,7 @@ app.delete("/pastes/:paste_id", async (req, res) => {
   try {
     const { paste_id } = req.params;
     const textComments = "DELETE FROM comments WHERE paste_id = $1";
-    const textPaste = "DELETE FROM pastebin WHERE paste_id = $1";
+    const textPaste = "DELETE FROM pastes WHERE paste_id = $1";
     const values = [paste_id];
     await client.query(textComments, values);
     await client.query(textPaste, values);
@@ -79,7 +79,7 @@ app.put("/pastes/:paste_id", async (req, res) => {
   try {
     const { paste_id } = req.params;
     const { code } = req.body;
-    const text = "UPDATE pastebin SET code = $1 WHERE paste_id = $2";
+    const text = "UPDATE pastes SET code = $1 WHERE paste_id = $2";
     const values = [code, paste_id];
     const editPaste = await client.query(text, values);
     res.json("Code was updated");
@@ -109,7 +109,7 @@ app.get("/pastes/:paste_id/comments", async (req, res) => {
   try {
     const { paste_id } = req.params;
     const text =
-      "SELECT comment_id, comment, comments.paste_id FROM comments LEFT JOIN pastebin ON pastebin.paste_id = comments.paste_id WHERE pastebin.paste_id = $1";
+      "SELECT comment_id, comment, comments.paste_id FROM comments LEFT JOIN pastes ON pastes.paste_id = comments.paste_id WHERE pastes.paste_id = $1";
     const values = [paste_id];
     const dbres = await client.query(text, values);
     const comments = dbres.rows;
